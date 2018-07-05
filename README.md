@@ -30,5 +30,6 @@ These are my codes and solutions for Stage 3
 
 ### Web App
 - Download or clone this repo
+- From command line, enter `npm install` to install all node module dependencies
 - From command line, enter `npm run start`
 - Go to your Chrome Browser (Chrome Canary is recommended) and go to `http://localhost:8000`
