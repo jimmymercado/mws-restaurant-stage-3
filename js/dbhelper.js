@@ -15,7 +15,7 @@ class DBHelper {
     //const port = 8000; // Change this to your server port
     //return `http://localhost:${port}/data/restaurants.json`;
     const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}`;
   }
 
   static get idbPromise() {
@@ -23,7 +23,9 @@ class DBHelper {
 			return Promise.resolve();
 		} else {
 			return idb.open('restaurants', 1, function (upgradeDb) {
-				upgradeDb.createObjectStore('restaurants', { keyPath: 'id' });
+        upgradeDb.createObjectStore('restaurants', { keyPath: 'id' });
+        upgradeDb.createObjectStore('reviews', { keyPath: 'id' }).createIndex('restaurant_id', 'restaurant_id');
+        upgradeDb.createObjectStore('pending-reviews', { keyPath: 'createdAt' });
 			});
 		}
   }
@@ -39,7 +41,7 @@ class DBHelper {
           //console.log('Restaurants getting from indexDB', restaurants);
           callback(null, restaurants)
         }else{
-          fetch(DBHelper.DATABASE_URL)
+          fetch(`${DBHelper.DATABASE_URL}/restaurants`)
           .then(resp => resp.json())
           .then(resp => {
             const trans = db.transaction('restaurants', 'readwrite');
@@ -55,11 +57,106 @@ class DBHelper {
           })
         }
       })
+    })    
+  }
 
+  static fetchReviews_OLD(callback){
+    DBHelper.idbPromise.then(db => {
+      const trans = db.transaction('reviews');
+      const store = trans.objectStore('reviews');
 
-
+      store.getAll()
+      .then(reviews => {
+        if(reviews && reviews.length > 0){
+          console.log('reviews', reviews);
+          callback(null, reviews);
+        }else{
+          //fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${restaurant.id}`)
+          fetch(`${DBHelper.DATABASE_URL}/reviews/`)
+          .then(resp => resp.json())
+          .then(resp => {
+            console.log('reviews result from fetchReview()', resp);
+            const trans = db.transaction('reviews', 'readwrite');
+            const store = trans.objectStore('reviews');
+            resp.forEach(review => store.put(review));
+            callback(null, resp);
+          })
+          .catch(err => {
+            callback(err, null);
+          })
+        }
+      })
     })
-    
+  }
+
+  static fetchReviews(id, callback){
+    console.log('getting reviews');
+    DBHelper.idbPromise.then(db => {
+      if(!db){console.log('no idb');}
+      const trans = db.transaction('reviews');
+      const store = trans.objectStore('reviews');
+
+      store.getAll()
+      .then(reviews => {
+        if(reviews.length > 0){
+          console.log('looping in reviews in IDB', reviews);
+          let data = [];        
+          reviews.forEach(review => {
+            if(review.restaurant_id == id) data.push(review);
+          })
+          
+          if(data.length > 0){
+            console.log('found reviews in IDB', data);
+            callback(null, data);
+          }else{
+            //fetch from server
+            fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${id}`)
+            .then(resp => resp.json())
+            .then(resp => {
+              console.log('reviews result from server', resp);
+              const trans = db.transaction('reviews', 'readwrite');
+              const store = trans.objectStore('reviews');
+              resp.forEach(review => store.put(review));
+              console.log('storing reviews in IDB', resp);
+              callback(null, resp);
+            })
+            .catch(err => {
+              callback(err, null);
+            })
+          }
+        }else{
+          //fetch from server
+          fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${id}`)
+          .then(resp => resp.json())
+          .then(resp => {
+            console.log('reviews result from server', resp);
+            const trans = db.transaction('reviews', 'readwrite');
+            const store = trans.objectStore('reviews');
+            resp.forEach(review => store.put(review));
+            console.log('storing reviews in IDB', resp);
+            callback(null, resp);
+          })
+          .catch(err => {
+            callback(err, null);
+          })
+        }
+      })
+      .catch(err => {
+        console.log('nothing in IDB');
+        return;
+      })
+    })
+  }
+
+  static fetchReviewsByRestaurantId(id, callback) {
+    DBHelper.fetchReviews(id, (error, reviews) => {
+      if (error) {
+        callback(error, null);
+      } else {
+        console.log(`${typeof(reviews)}: reviews result from fetchReviewsByRestaurantId()`, reviews);      
+        callback(null, reviews);
+      }
+    });
   }
 
   /**
@@ -72,6 +169,7 @@ class DBHelper {
         callback(error, null);
       } else {
         const restaurant = restaurants.find(r => r.id == id);
+        console.log('restaurant results from fetchRestaurantById()', restaurant);
         if (restaurant) { // Got the restaurant
           callback(null, restaurant);
         } else { // Restaurant does not exist in the database
@@ -209,6 +307,73 @@ class DBHelper {
     return marker;
   } 
 
+
+
+
+  //Added by Jimmy Mercado    
+  static submitReview(data, callback){
+
+    fetch(`${DBHelper.DATABASE_URL}/reviews`, {
+      method: 'post',
+      headers:{
+        'content-type' : 'application/json'
+      },
+      referrer: 'no-referrer', 
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(data => {        
+      this.idbPromise.then(db => {
+        const trans = db.transaction('reviews', 'readwrite');
+        const store = trans.objectStore('reviews');
+        store.put(data);
+      });
+      console.log('data stored in Server and IDB', data);
+      callback(null, data);
+    })
+    .catch(err => {
+      /*when offline*/
+      console.log('Oops! you\'re offline!', err);
+      
+      data['createdAt'] = new Date().getTime();
+      data['updatedAt'] = new Date().getTime();
+      this.idbPromise.then(db => {
+        const trans = db.transaction('pending-reviews', 'readwrite');
+        const store = trans.objectStore('pending-reviews');
+        store.put(data);
+      });
+      console.log('data stored in IDB pending-reviews', data);
+      callback(null, data);
+      
+    })
+  }
+
+  static submitPendingReview(){
+    this.idbPromise.then(db => {
+      const trans = db.transaction('pending-reviews');
+      const store = trans.objectStore('pending-reviews');
+      store.getAll()
+      .then(data => {
+				console.log('data from offline IDB', data);
+				data.forEach(review => {
+          
+          DBHelper.submitReview(review, (err, returnData) => {
+            if(returnData != null){
+              console.log('data returned from pending-reviews', returnData);
+            }
+          })
+
+				})
+        db.transaction('pending-reviews','readwrite').objectStore('pending-reviews').clear();
+        console.log('data removed from pending-reviews', data);
+      })
+      
+    });
+  }
+
+
 }
+
+
 
 export {DBHelper, newMap}

@@ -1,6 +1,7 @@
 import {DBHelper, newMap}  from './dbhelper';
 
-var restaurant;
+let restaurant;
+let reviews;
 
 /**
  * Initialize map as soon as the page is loaded.
@@ -8,6 +9,27 @@ var restaurant;
 document.addEventListener('DOMContentLoaded', (event) => {  
   initMap();
 });
+
+/*initialize onsubmit*/
+
+const form = document.getElementById("form1");
+
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+  let formData = getFormData();
+  
+  DBHelper.submitReview(formData, (err, returnData) => {
+    if(returnData != null){
+      console.log('data returned', returnData);
+      const ul = document.getElementById('reviews-list');
+      ul.appendChild(createReviewHTML(returnData));
+      form.reset();
+    }
+  })
+
+});
+
+
 
 /**
  * Initialize leaflet map
@@ -50,14 +72,34 @@ const fetchRestaurantFromURL = (callback) => {
     error = 'No restaurant id in URL'
     callback(error, null);
   } else {
-    DBHelper.fetchRestaurantById(id, (error, restaurant) => {
+    DBHelper.fetchRestaurantById(id, (err, restaurant) => {
       self.restaurant = restaurant;
       if (!restaurant) {
-        console.error(error);
+        console.error(err);
         return;
       }
-      fillRestaurantHTML();
-      callback(null, restaurant)
+      
+      // DBHelper.fetchReviews(self.restaurant, (err, reviews) => {
+      //   self.restaurant.reviews = reviews;
+      //   if (!reviews) {
+      //     console.error(err);
+      //   }
+      //   fillRestaurantHTML();
+      //   callback(null, restaurant)
+      // })
+      DBHelper.fetchReviewsByRestaurantId(id, (err, reviews) => {
+        console.log('from top', reviews);
+        self.restaurant.reviews = reviews;
+        if (!reviews) {
+          console.error(err);
+          return;
+        }
+        fillRestaurantHTML();
+        callback(null, restaurant)
+      })
+      
+      
+
     });
   }
 }
@@ -66,6 +108,14 @@ const fetchRestaurantFromURL = (callback) => {
  * Create restaurant HTML and add it to the webpage
  */
 const fillRestaurantHTML = (restaurant = self.restaurant) => {
+
+  /*
+  * Added by Jimmy Mercado
+  * Favorite Checkbox
+  */
+  const favorite = document.getElementById('chkFavorite');
+  favorite.checked = (restaurant.is_favorite != 'undefined') ? restaurant.is_favorite : false;
+
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
@@ -186,7 +236,7 @@ const createReviewHTML = (review) => {
   //li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.updatedAt).toDateString();
   date.setAttribute('tabindex', 0);
   //li.appendChild(date);
   div.innerHTML = name.outerHTML + ' ' + date.outerHTML;
@@ -230,4 +280,15 @@ const getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+
+/*collect all form entries*/
+function getFormData(){
+  let formData = {"restaurant_id": self.restaurant.id};
+  formData['name'] = form.name.value;
+  formData['rating'] = form.rating.value;
+  formData['comments'] = form.comments.value;
+  console.log('data collected', formData);
+  return formData;
 }

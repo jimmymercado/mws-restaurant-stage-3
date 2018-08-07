@@ -177,7 +177,8 @@ nav h1 a {
   min-width: 100%;
 }
 #restaurants-list li h3 {
-  color: #f18200;
+  /*color: #f18200;*/
+  color: #01447e;
   font-family: Arial,sans-serif;
   font-size: 14pt;
   font-weight: 200;
@@ -191,12 +192,12 @@ nav h1 a {
   font-size: 11pt;
 }
 #restaurants-list li a {
-  background-color: orange;
+  background-color: #816734;
   border-bottom: 3px solid #eee;
-  color: #333;
+  color: #fff;
   display: inline-block;
-  font-size: 10pt;
-  font-weight:bold;
+  font-size: 1.1 em;
+  font-weight:400;
   margin: 15px 0 0;
   padding: 8px 30px 10px;
   text-align: center;
@@ -298,3 +299,4 @@ nav h1 a {
   color: #666;
 }
 
+/*Favorite Checkbox*/

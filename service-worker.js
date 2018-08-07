@@ -32,7 +32,7 @@ self.addEventListener('install', function(e){
     e.waitUntil(
         caches.open(staticCacheName).then(function(cache){
             //console.log('[ServiceWorker] caching files')
-            return cache.addAll(cacheFiles).catch((error) => console.log(`Service Worker Open Erro = ${error}`));
+            return cache.addAll(cacheFiles).catch((error) => console.log(`Service Worker Open Error = ${error}`));
         })
     )
 
@@ -93,8 +93,8 @@ self.addEventListener('fetch', function(e){
                     if(networkResponse.status === 404){
                         return caches.match('/404.html');
                     }
-                    //console.log('[ServiceWorker] adding url to cache', e.request.url);            
-                    cache.put(e.request, networkResponse.clone());
+                    console.log('[ServiceWorker] adding url to cache', e.request.url);            
+                    cache.put(e.request.url, networkResponse.clone());
                     return networkResponse;
                 });
     
@@ -105,6 +105,16 @@ self.addEventListener('fetch', function(e){
         })
     );
     return;
+
+});
+
+
+self.addEventListener('message', (event) => {    	
+    // var data = JSON.parse(event.data);
+    console.log('[serviceWorker] message', event);
+    if (event.data.action === 'skipWaiting') {
+       self.skipWaiting();
+    }
 
 });
 
