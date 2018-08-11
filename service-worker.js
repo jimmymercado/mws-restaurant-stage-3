@@ -14,10 +14,12 @@ let cacheFiles = [
     'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js',
     'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
     'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css',
+    'https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css',
     'manifest.json',
     'pub/js/main.bundle.js',
     'pub/js/restaurant.bundle.js',
     'pub/css/styles.bundle.css'
+
 
 ];
 
@@ -116,6 +118,10 @@ self.addEventListener('message', (event) => {
        self.skipWaiting();
     }
 
+});
+
+self.addEventListener('sync', function(event) {
+    self.registration.showNotification("Sync event fired!");
 });
 
 function serveSite(e){

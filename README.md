@@ -18,7 +18,7 @@ These are my codes and solutions for Stage 3
 ### Performance
 - Lighthouse targets for each category exceed:  
    Progressive Web App: >90  
-   Performance: >70  
+   Performance: >90  
    Accessibility: >90  
 
 ## Installing and Running Locally

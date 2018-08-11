@@ -1,7 +1,7 @@
 {
-  "name": "mws-restaurant-stage-1",
+  "name": "mws-restaurant-stage-3",
   "version": "1.0.0",
-  "description": "MWS Restaurant Review Poject - Stage 1",
+  "description": "MWS Restaurant Review Poject - Stage 3",
   "main": "",
   "scripts": {
     "start": "python -m http.server 8000",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jimmymercado/mws-restaurant-stage-2.git"
+    "url": "git+https://github.com/jimmymercado/mws-restaurant-stage-3.git"
   },
   "author": "JimmyM",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jimmymercado/mws-restaurant-stage-2/issues"
+    "url": "https://github.com/jimmymercado/mws-restaurant-stage-3/issues"
   },
-  "homepage": "https://github.com/jimmymercado/mws-restaurant-stage-2#readme",
+  "homepage": "https://github.com/jimmymercado/mws-restaurant-stage-3#readme",
   "dependencies": {
     "idb": "^2.1.2"
   },

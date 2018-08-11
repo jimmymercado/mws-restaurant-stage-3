@@ -1,4 +1,4 @@
-
+/*@import '/node_modules/pretty-checkbox/dist/pretty-checkbox.min.css';*/
 
 /* ====================== Media Queries ====================== */
 
@@ -330,4 +330,68 @@ nav h1{
     margin: 20px 20px 0;
     display: inline-block;
     
+}
+
+/*Review Form*/
+.formcontainer {
+    background-color: #fff;
+    border: 2px solid #f3f3f3;
+    display: block;
+    margin: 0 0 30px;
+    overflow: auto;
+    position: relative;
+  }
+
+.formHeader{
+    background-color: #252831;    
+    overflow: auto;
+}
+
+.formcontainer label {
+    display:block;
+    margin-bottom:15px;
+    font-size:1em;
+}
+
+.formcontainer input, .formcontainer textarea {
+    width:100%;
+    font-size:1em;
+}
+.formcontainer select {
+    font-size:1em;
+}
+
+
+.formcontainer p {
+    margin: 0;
+    padding:0;
+}
+.formcontainer > p {
+    padding:20px;
+}
+
+.formHeader p {
+    color:#fff;
+    font-size: 1.3em;
+    font-weight: 300;
+    padding: 15px;
+    margin:0;
+}
+
+.formcontainer [type=submit] {
+    float:right;
+    background-color: #f18200;
+    color:#252831;
+    width:auto;
+    padding:10px;
+    font-size: 1.1em;
+    font-weight: 300;
+    margin-bottom:15px;
+}
+
+
+/*Favorite Checkbox*/
+.pretty{
+    font-size:1.2em;
+    margin: 0 0 1em 0;
 }

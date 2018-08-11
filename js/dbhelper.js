@@ -60,34 +60,6 @@ class DBHelper {
     })    
   }
 
-  static fetchReviews_OLD(callback){
-    DBHelper.idbPromise.then(db => {
-      const trans = db.transaction('reviews');
-      const store = trans.objectStore('reviews');
-
-      store.getAll()
-      .then(reviews => {
-        if(reviews && reviews.length > 0){
-          console.log('reviews', reviews);
-          callback(null, reviews);
-        }else{
-          //fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${restaurant.id}`)
-          fetch(`${DBHelper.DATABASE_URL}/reviews/`)
-          .then(resp => resp.json())
-          .then(resp => {
-            console.log('reviews result from fetchReview()', resp);
-            const trans = db.transaction('reviews', 'readwrite');
-            const store = trans.objectStore('reviews');
-            resp.forEach(review => store.put(review));
-            callback(null, resp);
-          })
-          .catch(err => {
-            callback(err, null);
-          })
-        }
-      })
-    })
-  }
 
   static fetchReviews(id, callback){
     console.log('getting reviews');
@@ -354,21 +326,45 @@ class DBHelper {
       const store = trans.objectStore('pending-reviews');
       store.getAll()
       .then(data => {
-				console.log('data from offline IDB', data);
-				data.forEach(review => {
-          
-          DBHelper.submitReview(review, (err, returnData) => {
-            if(returnData != null){
-              console.log('data returned from pending-reviews', returnData);
-            }
-          })
+        if(data.length > 1){
 
-				})
-        db.transaction('pending-reviews','readwrite').objectStore('pending-reviews').clear();
-        console.log('data removed from pending-reviews', data);
+          console.log('data from offline IDB', data);
+          data.forEach(review => {
+            
+            DBHelper.submitReview(review, (err, returnData) => {
+              if(returnData != null){
+                console.log('data returned from pending-reviews', returnData);
+              }
+            })
+
+          })
+          db.transaction('pending-reviews','readwrite').objectStore('pending-reviews').clear();
+          console.log('data removed from pending-reviews', data);
+        }
       })
-      
     });
+  }
+
+
+  static updateFavorite(id, isFavorite){
+    fetch(`${DBHelper.DATABASE_URL}/restaurants/${id}/?is_favorite=${isFavorite}`, {
+      method: 'put'
+    })
+    .then(res => res.json())
+    .then(data => {
+      DBHelper.idbPromise.then(db => {
+        const trans = db.transaction('restaurants', 'readwrite');
+        const store = trans.objectStore('restaurants');
+        store.put(data);
+      })
+      return data;
+    })
+    .catch(err =>{
+      /*when offline*/
+      console.log('Oops! You clicked the Favorite button while you\'re offline!', isFavorite);
+      
+
+    })
   }
 
 

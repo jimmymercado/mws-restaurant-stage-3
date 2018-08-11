@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 /*initialize onsubmit*/
-
 const form = document.getElementById("form1");
 
 form.addEventListener('submit', function(event) {
@@ -28,7 +27,6 @@ form.addEventListener('submit', function(event) {
   })
 
 });
-
 
 
 /**
@@ -74,6 +72,7 @@ const fetchRestaurantFromURL = (callback) => {
   } else {
     DBHelper.fetchRestaurantById(id, (err, restaurant) => {
       self.restaurant = restaurant;
+      console.log(`isFavorite = ${restaurant.is_favorite}`)
       if (!restaurant) {
         console.error(err);
         return;
@@ -114,7 +113,20 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
   * Favorite Checkbox
   */
   const favorite = document.getElementById('chkFavorite');
-  favorite.checked = (restaurant.is_favorite != 'undefined') ? restaurant.is_favorite : false;
+  //favorite.checked = (restaurant.is_favorite == 'undefined') ? false : restaurant.is_favorite;
+  //favorite.checked = (restaurant.is_favorite.toLowerCase() === 'true');
+  
+  let checked = false;
+  if(typeof restaurant.is_favorite==='undefined'){
+    checked = false;      
+  }else{
+    checked = (restaurant.is_favorite.toString().toLowerCase() === 'true');
+  }
+  favorite.checked = checked;
+
+  favorite.addEventListener('change', event => {
+    DBHelper.updateFavorite(restaurant.id, event.target.checked);
+  });
 
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
@@ -289,6 +301,6 @@ function getFormData(){
   formData['name'] = form.name.value;
   formData['rating'] = form.rating.value;
   formData['comments'] = form.comments.value;
-  console.log('data collected', formData);
+  console.log('data collected from web form', formData);
   return formData;
 }
