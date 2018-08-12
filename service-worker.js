@@ -121,6 +121,9 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('sync', function(event) {
+    if (event.tag == 'syncPage') {
+        console.log('syncPage');
+    }
     self.registration.showNotification("Sync event fired!");
 });
 

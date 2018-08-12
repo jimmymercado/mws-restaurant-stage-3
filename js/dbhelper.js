@@ -65,6 +65,8 @@ class DBHelper {
     console.log('getting reviews');
     DBHelper.idbPromise.then(db => {
       if(!db){console.log('no idb');}
+      
+      /*getting data from reviews IDB*/
       const trans = db.transaction('reviews');
       const store = trans.objectStore('reviews');
 
@@ -77,25 +79,41 @@ class DBHelper {
             if(review.restaurant_id == id) data.push(review);
           })
           
-          if(data.length > 0){
-            console.log('found reviews in IDB', data);
-            callback(null, data);
-          }else{
-            //fetch from server
-            fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${id}`)
-            .then(resp => resp.json())
-            .then(resp => {
-              console.log('reviews result from server', resp);
-              const trans = db.transaction('reviews', 'readwrite');
-              const store = trans.objectStore('reviews');
-              resp.forEach(review => store.put(review));
-              console.log('storing reviews in IDB', resp);
-              callback(null, resp);
-            })
-            .catch(err => {
-              callback(err, null);
-            })
-          }
+          /*getting data from pending-reviews IDB if there's an offline submission*/
+          console.log('getting pending-reviews');
+          const transPR = db.transaction('pending-reviews');
+          const storePR = transPR.objectStore('pending-reviews');
+          storePR.getAll().then(pendingreviews => {
+            if(pendingreviews.length > 0){
+              console.log('looping in pending-reviews in IDB', pendingreviews);
+              pendingreviews.forEach(pendingreview => {
+                if(pendingreview.restaurant_id == id) data.push(pendingreview);
+              })
+            }
+            
+            if(data.length > 0){
+              console.log('found reviews in IDB', data);
+              callback(null, data);
+            }else{
+              //fetch from server
+              fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${id}`)
+              .then(resp => resp.json())
+              .then(resp => {
+                console.log('reviews result from server', resp);
+                const trans = db.transaction('reviews', 'readwrite');
+                const store = trans.objectStore('reviews');
+                resp.forEach(review => store.put(review));
+                console.log('storing reviews in IDB', resp);
+                callback(null, resp);
+              })
+              .catch(err => {
+                callback(err, null);
+              })
+            }
+            
+          })
+
+          
         }else{
           //fetch from server
           fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${id}`)
@@ -341,6 +359,10 @@ class DBHelper {
           db.transaction('pending-reviews','readwrite').objectStore('pending-reviews').clear();
           console.log('data removed from pending-reviews', data);
         }
+      })
+      .catch(err => {
+        console.log('error in saving pending reviews!', err);
+        
       })
     });
   }

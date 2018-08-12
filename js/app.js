@@ -7,10 +7,44 @@ if('serviceWorker' in navigator){
         .register('/service-worker.js', {scope: '/'})
         .then(function(registration){
             console.log('[serviceWorker] Registered');
+
+            if(!navigator.serviceWorker.controller){return}
+
+            if(registration.waiting){
+                navigator.serviceWorker.controller.postMessage({action:'skipWaiting'});
+            }
+
+            if(registration.installing){
+                navigator.serviceWorker.addEventListener('statechange', function(){
+                    if(navigator.serviceWorker.controller.state=='installed'){
+                        navigator.serviceWorker.controller.postMessage({action:'skipWaiting'});
+                    }
+                });
+            }
+
+            registration.addEventListener('updatefound', () =>{
+                navigator.serviceWorker.addEventListener('statechange', () =>{
+                    if(navigator.serviceWorker.controller.state='installed'){
+                        navigator.serviceWorker.controller.postMessage({action:'skipWaiting'});
+                    }
+                })
+            });
         })
         .catch(function(err){
             console.log('[serviceWorker] Unsupported', err);
         })
+
+        var refreshing;
+        navigator.serviceWorker.addEventListener('controllerchange', () =>{
+            if(refreshing) return;
+            window.location.reload();
+            refreshing= true; 
+        })
+
+
+        navigator.serviceWorker.ready.then((registration) => {
+            return registration.sync.register('syncPage');
+        });
   }
 
 
