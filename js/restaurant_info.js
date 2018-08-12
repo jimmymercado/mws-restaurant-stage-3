@@ -77,15 +77,7 @@ const fetchRestaurantFromURL = (callback) => {
         console.error(err);
         return;
       }
-      
-      // DBHelper.fetchReviews(self.restaurant, (err, reviews) => {
-      //   self.restaurant.reviews = reviews;
-      //   if (!reviews) {
-      //     console.error(err);
-      //   }
-      //   fillRestaurantHTML();
-      //   callback(null, restaurant)
-      // })
+
       DBHelper.fetchReviewsByRestaurantId(id, (err, reviews) => {
         console.log('from top', reviews);
         self.restaurant.reviews = reviews;
@@ -96,9 +88,6 @@ const fetchRestaurantFromURL = (callback) => {
         fillRestaurantHTML();
         callback(null, restaurant)
       })
-      
-      
-
     });
   }
 }
@@ -113,8 +102,6 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
   * Favorite Checkbox
   */
   const favorite = document.getElementById('chkFavorite');
-  //favorite.checked = (restaurant.is_favorite == 'undefined') ? false : restaurant.is_favorite;
-  //favorite.checked = (restaurant.is_favorite.toLowerCase() === 'true');
   
   let checked = false;
   if(typeof restaurant.is_favorite==='undefined'){
@@ -142,18 +129,13 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
   * Added by Jimmy Mercado
   * include srcset and alt attrib
   */
-  //image.setAttribute('alt', restaurant.photo_description);
   image.setAttribute('alt', 'Photo of ' + restaurant.name);
   const imgPath = DBHelper.imageUrlForRestaurant(restaurant);
-  //const imgPathFileName = imgPath.substring(0, (imgPath.length - 4));
-  //const imgFileExtesion = imgPath.substring((imgPath.length - 4), imgPath.length);
 
   const imgPathFileName = imgPath;
   const imgFileExtesion = '.jpg';
 
   image.setAttribute("srcset", imgPathFileName + imgFileExtesion + ' 1140w, ' + imgPathFileName + '_400px' + imgFileExtesion + ' 900w, ' + imgPathFileName + '_270px' + imgFileExtesion + ' 650w, ' + imgPathFileName + imgFileExtesion + ' 645w ' )
-
-
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;

@@ -297,9 +297,6 @@ class DBHelper {
     return marker;
   } 
 
-
-
-
   //Added by Jimmy Mercado    
   static submitReview(data, callback){
 
@@ -346,24 +343,20 @@ class DBHelper {
       store.getAll()
       .then(data => {
         if(data.length > 0){
-
           console.log('data from offline IDB', data);
-          data.forEach(review => {
-            
+          data.forEach(review => {            
             DBHelper.submitReview(review, (err, returnData) => {
               if(returnData != null){
                 console.log('data returned from pending-reviews', returnData);
               }
             })
-
           })
           db.transaction('pending-reviews','readwrite').objectStore('pending-reviews').clear();
           console.log('data removed from pending-reviews', data);
         }
       })
       .catch(err => {
-        console.log('error in saving pending reviews!', err);
-        
+        console.log('error in saving pending reviews!', err);        
       })
     });
   }
@@ -384,13 +377,9 @@ class DBHelper {
     })
     .catch(err =>{
       /*when offline*/
-      console.log('Oops! You clicked the Favorite button while you\'re offline!', isFavorite);
-      
-
+      console.log('Oops! You clicked the Favorite button while you\'re offline!', isFavorite);   
     })
   }
-
-
 }
 
 
