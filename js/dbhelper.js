@@ -85,7 +85,7 @@ class DBHelper {
           const storePR = transPR.objectStore('pending-reviews');
           storePR.getAll().then(pendingreviews => {
             if(pendingreviews.length > 0){
-              console.log('looping in pending-reviews in IDB', pendingreviews);
+              console.log('looping pending-reviews in IDB', pendingreviews);
               pendingreviews.forEach(pendingreview => {
                 if(pendingreview.restaurant_id == id) data.push(pendingreview);
               })

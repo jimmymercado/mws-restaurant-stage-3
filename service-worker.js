@@ -110,7 +110,6 @@ self.addEventListener('fetch', function(e){
 
 });
 
-/*
 self.addEventListener('message', (event) => {    	
     console.log('[serviceWorker] message', event);
     if (event.data.action === 'skipWaiting') {
@@ -119,12 +118,6 @@ self.addEventListener('message', (event) => {
 
 });
 
-self.addEventListener('sync', function(event) {
-    if (event.tag == 'syncPage') {
-        console.log('syncPage');
-    }
-});
-*/
 
 function serveSite(e){
     return caches.open(staticCacheName).then(function(cache){
