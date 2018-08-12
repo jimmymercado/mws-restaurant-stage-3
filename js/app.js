@@ -41,10 +41,6 @@ if('serviceWorker' in navigator){
             refreshing= true; 
         })
 
-
-        navigator.serviceWorker.ready.then((registration) => {
-            return registration.sync.register('syncPage');
-        });
   }
 
 

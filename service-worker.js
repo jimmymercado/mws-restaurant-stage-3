@@ -110,9 +110,8 @@ self.addEventListener('fetch', function(e){
 
 });
 
-
+/*
 self.addEventListener('message', (event) => {    	
-    // var data = JSON.parse(event.data);
     console.log('[serviceWorker] message', event);
     if (event.data.action === 'skipWaiting') {
        self.skipWaiting();
@@ -124,8 +123,8 @@ self.addEventListener('sync', function(event) {
     if (event.tag == 'syncPage') {
         console.log('syncPage');
     }
-    self.registration.showNotification("Sync event fired!");
 });
+*/
 
 function serveSite(e){
     return caches.open(staticCacheName).then(function(cache){

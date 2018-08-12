@@ -339,12 +339,13 @@ class DBHelper {
   }
 
   static submitPendingReview(){
+    console.log('submitPendingReview from pending-reviews IDB');
     this.idbPromise.then(db => {
       const trans = db.transaction('pending-reviews');
       const store = trans.objectStore('pending-reviews');
       store.getAll()
       .then(data => {
-        if(data.length > 1){
+        if(data.length > 0){
 
           console.log('data from offline IDB', data);
           data.forEach(review => {
