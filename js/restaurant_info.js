@@ -253,7 +253,6 @@ const getParameterByName = (name, url) => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-
 /*collect all form entries*/
 function getFormData(){
   let formData = {"restaurant_id": self.restaurant.id};
